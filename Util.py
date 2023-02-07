@@ -16,6 +16,8 @@ def SaveStrToFile(String, FilePath):
 
 
 def IsSame(FileA, FileB):
+    if not os.path.exists(FileA) or not os.path.exists(FileB):
+        return False
     return filecmp.cmp(FileA, FileB)
 
 

@@ -3,11 +3,13 @@ import time
 import jionlp
 import Util
 import InputSimulator.ActionSimulator as ActionSimulator
+import Config.Statics as Config
 
 DefaultTag = "吃喝玩乐"
-TagList = ["吴彦祖/刘亦菲", "剧本杀", "密室", "户外/运动", "出游", DefaultTag, "跳蚤市场"]
+TagList = ["吴彦祖/刘亦菲", "剧本杀", "密室", "户外/运动", "出游", "境外旅游", DefaultTag]
 CharmingList = ["404 Not Found"]
 Activities = {}
+HasBeenHandled = {}
 ActivitiesWithTag = {}
 ValidChatMsg = {}
 ChatMsgs = []
@@ -58,6 +60,9 @@ def IsChamberTag(SendContent):
 
 
 def IsLARP(SendContent):
+    if SendContent.find("《") != -1:
+        return True
+
     List = SendContent.split(" ")
     for Str in List:
         if re.search(".+本", Str) is not None:
@@ -65,14 +70,28 @@ def IsLARP(SendContent):
     return False
 
 
-def IsTravel(TimeConfig):
-    Type = TimeConfig["type"]
-    if Type == "time_span":
+def IsTravelAbroad(SendContent, TimeConfig):
+    if CheckExists(SendContent, Config.CountryList) or CheckExists(SendContent, Config.CityAbroadList):
+        return True
+    return False
+
+
+def IsTravel(SendContent, TimeConfig):
+    if CheckExists(SendContent, Config.TravelList):
         return True
     return False
 
 
 def IsSport(SendContent):
+    if CheckExists(SendContent, Config.SportList) or CheckExists(SendContent, Config.MountainList):
+        return True
+    return False
+
+
+def CheckExists(Content, List):
+    for Item in List:
+        if Content.find(Item) != -1:
+            return True
     return False
 
 
@@ -86,11 +105,14 @@ def GetTag(SendContent, SenderName, TimeConfig):
     if IsLARP(SendContent):
         return "剧本杀"
 
-    if IsTravel(TimeConfig):
-        return "出游"
-
     if IsSport(SendContent):
         return "户外/运动"
+
+    if IsTravelAbroad(SendContent, TimeConfig):
+        return "境外旅游"
+
+    if IsTravel(SendContent, TimeConfig):
+        return "出游"
 
     return DefaultTag
 
@@ -185,7 +207,7 @@ def ActivityToString(Activity, Count):
     Requirement = Activity["Requirement"]
     Desc = SendContent + Requirement
     Desc = Desc.rstrip()
-    return "【{}】 {}, 上车滴滴:{}。\n\n".format(Count, Desc, SenderName)
+    return "【{}】 {}, 上车滴滴:{}。\n".format(Count, Desc, SenderName)
 
 
 def Delete(SenderName, Param):
@@ -238,14 +260,23 @@ def GetSenderName(ChatMsg):
     return FindStr[0][:-11]
 
 
+def Preprocess(ChatMsg):
+    return ChatMsg.replace("本周", "这周")
+
+
 def GenerateAnnouncement(ChatMsg, bClearMsg):
-    global ValidChatMsg, ChatMsgs
+    global ValidChatMsg, ChatMsgs, HasBeenHandled
     Clear()
     ChatMsg = Util.FileToStr("./Saved/Filtered_Chat_Msg/ChatMsg.txt") + ChatMsg
     ChatMsg = ChatMsg.replace("\r", "\n")
     FindLists = re.findall(".+[0-9]{2}.+[0-9]{2}\n@Bot[\s\S]*?\n\n", ChatMsg)
     HasBeenHandled = {}
     for ChatMsg in FindLists:
+        ChatMsg = Preprocess(ChatMsg)
+        if HasBeenHandled.get(ChatMsg):
+            continue
+        HasBeenHandled.update({ChatMsg: True})
+
         ChatMsgs.append(ChatMsg)
         ChatMsgSplit = ChatMsg.split("\n")
         if len(ChatMsgSplit) < 4:
@@ -258,10 +289,6 @@ def GenerateAnnouncement(ChatMsg, bClearMsg):
                 if i != len(ChatMsgSplit) - 1:
                     SendContent += " "
 
-        if HasBeenHandled.get(SendContent):
-            continue
-        HasBeenHandled.update({SendContent: True})
-
         SendContent, OriginSendContent = FormatSendContent(SendContent)
         if ExecuteCommand(SenderName, OriginSendContent):
             continue
@@ -273,6 +300,7 @@ def GenerateAnnouncement(ChatMsg, bClearMsg):
             print("Exception Raised:", OriginSendContent)
 
     Count = 0
+    TagCount = 0
     Announcement = ""
     for Tag in TagList:
         ActivityList = ActivitiesWithTag[Tag]
@@ -280,8 +308,11 @@ def GenerateAnnouncement(ChatMsg, bClearMsg):
             break
         if len(ActivityList) == 0:
             continue
-
-        Announcement += "★{}★\n".format(Tag)
+        if TagCount == 0:
+            Announcement += "★{}★\n".format(Tag)
+        else:
+            Announcement += "\n★{}★\n".format(Tag)
+        TagCount += 1
         SortList = sorted(ActivityList, key=lambda d: d['TimeStamp'])
         Cnt = 0
         for Activity in SortList:

@@ -123,8 +123,11 @@ def CopyPart():
     InputSimulatorBase.MousePress()
     time.sleep(0.5)
     autogui.dragTo(950, 231, 3, button="left", mouseDownUp=False)
-    autogui.dragTo(CHAT_MSG_RIGHT_BOTTOM_CORNER[0], CHAT_MSG_RIGHT_BOTTOM_CORNER[1], 3, button="left", tween=DragFunc)
+    time.sleep(0.2)
+    autogui.dragTo(CHAT_MSG_RIGHT_BOTTOM_CORNER[0], CHAT_MSG_RIGHT_BOTTOM_CORNER[1], 1.6, button="left", tween=DragFunc)
+    time.sleep(0.2)
     InputSimulatorBase.MouseRelease()
+    time.sleep(0.2)
     InputSimulatorBase.Copy()
     time.sleep(0.2)
     InputSimulatorBase.MouseMoveToClick(CHAT_MSG_CANCEL_BUTTON, True)
@@ -135,12 +138,26 @@ def SelectAllChatMsg():
     ScrollToTop()
     ChatMsg = ""
     Count = 0
-    for Index in range(40):
+    for Index in range(50):
         CopyPart()
         IncrementMsg = pyperclip.paste()
-        if not IncrementMsg or ChatMsg.find(IncrementMsg) != -1:
+
+        if not IncrementMsg:
+            print("Msg has been clear")
+            Count = Count + 1
+        else:
+            if ChatMsg.find(IncrementMsg) != -1:
+                print("\nMatch {} {} [Begin]".format(Count, Util.GetCurrentTimeStamp()))
+                print(IncrementMsg)
+                print("\nMatch [End]\n")
+
+                Count = Count + 1
+            else:
+                ChatMsg += IncrementMsg
+        if Count == 2:
             break
-        ChatMsg += IncrementMsg
+        if Index == 49:
+            raise Exception("Try too many times")
     pyperclip.copy(ChatMsg)
     SaveCurrentPaste("Chat_Msg")
     return ChatMsg
