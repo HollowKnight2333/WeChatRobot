@@ -6,8 +6,8 @@ import InputSimulator.ActionSimulator as ActionSimulator
 import Config.Statics as Config
 
 DefaultTag = "吃喝玩乐"
-TagList = ["吴彦祖/刘亦菲", "剧本杀", "密室", "户外/运动", "出游", "境外旅游", DefaultTag]
-CharmingList = ["404 Not Found"]
+TagList = ["吴彦祖/刘亦菲", "剧本杀", "密室", "音乐Live", "户外/运动", "出游", "境外旅游", DefaultTag]
+CharmingList = []
 Activities = {}
 HasBeenHandled = {}
 ActivitiesWithTag = {}
@@ -95,6 +95,12 @@ def CheckExists(Content, List):
     return False
 
 
+def IsLive(SendContent):
+    if CheckExists(SendContent, Config.LiveList):
+        return True
+    return False
+
+
 def GetTag(SendContent, SenderName, TimeConfig):
     if IsCharming(SenderName):
         return "吴彦祖/刘亦菲"
@@ -104,6 +110,9 @@ def GetTag(SendContent, SenderName, TimeConfig):
 
     if IsLARP(SendContent):
         return "剧本杀"
+
+    if IsLive(SendContent):
+        return "音乐Live"
 
     if IsSport(SendContent):
         return "户外/运动"

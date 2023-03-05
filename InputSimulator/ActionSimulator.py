@@ -7,6 +7,7 @@ import InputSimulator.InputSimulatorBase as InputSimulatorBase
 import Util
 from Config import Statics
 from Util import GetCurrentTimeStamp, SaveStrToFile
+import re
 
 WECHAT_APP_POS = [1164, 1064]
 PYCHARM_POS = [1237, 1079]
@@ -20,7 +21,7 @@ GROUP_RIGHT_SIDE_BUTTON = [950, 56]
 GROUP_ANNOUNCEMENT_EXPAND_BUTTON = [752, 523]  # 大群
 # GROUP_ANNOUNCEMENT_EXPAND_BUTTON = [1249, 526]  # 测试群
 GROUP_ANNOUNCEMENT_EDIT_BUTTON = [461, 593]
-GROUP_ANNOUNCEMENT_TOP_LEFT_BUTTON = [318, 232]
+GROUP_ANNOUNCEMENT_TOP_LEFT_BUTTON = [334, 228]
 GROUP_ANNOUNCEMENT_CANCEL_BUTTON = [424, 593]
 
 GROUP_ANNOUNCEMENT_CONFIRM_BUTTON = [559, 599]
@@ -74,22 +75,31 @@ def OpenGroupAnnouncement():
 
 def SaveCurrentPaste(Tag):
     Paste = pyperclip.paste()
+    if not Paste:
+        return False
     LastUpdatedFile = Util.FindLatestUpdatedFile("./Saved/{}".format(Tag))
     SavedPath = "./Saved/{}/{}.txt".format(Tag, GetCurrentTimeStamp())
     SaveStrToFile(Paste, SavedPath)
 
-    if LastUpdatedFile is not False and Util.IsSame(LastUpdatedFile, SavedPath):
-        Util.Remove(SavedPath)
-        return False
+    if LastUpdatedFile is not False:
+        LastUpdatedFileInStr = Util.FileToStr(LastUpdatedFile)
+        if FormatString(LastUpdatedFileInStr) == FormatString(Paste):
+            Util.Remove(SavedPath)
+            return False
     return True
+
+
+def FormatString(InStr):
+    cop = re.compile("[^\u4e00-\u9fa5^a-z^A-Z^0-9]")
+    return cop.sub('', InStr)
 
 
 def SaveGroupAnnouncement():
     InputSimulatorBase.MouseMoveToClick(GROUP_ANNOUNCEMENT_EDIT_BUTTON, True)
     InputSimulatorBase.MouseMoveToClick(GROUP_ANNOUNCEMENT_TOP_LEFT_BUTTON, True)
-    time.sleep(0.5)
+    time.sleep(1)
     InputSimulatorBase.SelectAll()
-    time.sleep(0.5)
+    time.sleep(1)
     InputSimulatorBase.Copy()
     SaveCurrentPaste("Group_Announcement")
     InputSimulatorBase.MouseMoveToClick(GROUP_ANNOUNCEMENT_CANCEL_BUTTON, True)
@@ -193,6 +203,7 @@ def EditAnnouncement(Announcement):
     InputSimulatorBase.MouseMoveToClick(GROUP_ANNOUNCEMENT_TOP_LEFT_BUTTON, True)
     InputSimulatorBase.MouseMoveToClick(GROUP_ANNOUNCEMENT_CONFIRM_BUTTON, True)
     InputSimulatorBase.MouseMoveToClick(GROUP_ANNOUNCEMENT_SUBMIT_BUTTON, True)
+    time.sleep(4)
 
 
 def EditGroupAnnouncement(Announcement):
