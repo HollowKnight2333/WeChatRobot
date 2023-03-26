@@ -269,6 +269,14 @@ def Preprocess(ChatMsg):
     return ChatMsg.replace("本周", "这周")
 
 
+def GetSendTime(ChatMsg):
+    Info = ChatMsg.split("\n")[0].split(" ")
+    InfoLen = len(Info)
+    TimeInfo = str(Info[InfoLen-2] + Info[InfoLen-1])
+    TimeConfig = jionlp.parse_time(TimeInfo, time_base=time.time())
+    return Util.FormatTimeToTimeStamp(TimeConfig["time"][0])
+
+
 def GenerateAnnouncement(ChatMsg, bClearMsg):
     global ValidChatMsg, ChatMsgs, HasBeenHandled
     Clear()
@@ -286,6 +294,7 @@ def GenerateAnnouncement(ChatMsg, bClearMsg):
         ChatMsgSplit = ChatMsg.split("\n")
         if len(ChatMsgSplit) < 4:
             continue
+        SendTime = GetSendTime(ChatMsg)
         SenderName = GetSenderName(ChatMsg)
         SendContent = ""
         for i in range(1, len(ChatMsgSplit)):
@@ -298,7 +307,7 @@ def GenerateAnnouncement(ChatMsg, bClearMsg):
         if ExecuteCommand(SenderName, OriginSendContent):
             continue
         try:
-            TimeConfig = jionlp.parse_time(SendContent, time_base=time.time())
+            TimeConfig = jionlp.parse_time(SendContent, time_base=SendTime)
             if TimeConfig["time"] and len(TimeConfig["time"]) > 0:
                 AddActivity(SenderName, OriginSendContent, TimeConfig, ChatMsg)
         except:

@@ -31,13 +31,13 @@ if __name__ == '__main__':
             try:
                 ActionSimulator.BackupGroupAnnouncement()
                 ChatMsg = ActionSimulator.GetChatMsg()
-                # ChatMsg = Util.FileToStr('./Saved/Chat_Msg/1678953860.txt')
+                # ChatMsg = Util.FileToStr('./Saved/Chat_Msg/1679803636.txt')
                 GroupAnnouncement = Generator.GenerateAnnouncement(ChatMsg, NeedClear)
                 print(GroupAnnouncement)
                 pyperclip.copy(GroupAnnouncement)
-                # if ActionSimulator.SaveCurrentPaste("Group_Announcement"):
-                #     ActionSimulator.EditGroupAnnouncement(GroupAnnouncement)
-                #     EndTimeStamp = Util.GetCurrentTimeStamp()
+                if ActionSimulator.SaveCurrentPaste("Group_Announcement"):
+                    ActionSimulator.EditGroupAnnouncement(GroupAnnouncement)
+                    EndTimeStamp = Util.GetCurrentTimeStamp()
                 if ZeroAM < CurrentTimeStamp < ZeroAM + 60 * 60 * 9:
                     time.sleep(60 * 60 * 9)
                 else:
