@@ -39,10 +39,6 @@ def CheckEnableAdd(SenderName, TimeConfig):
     ActivityTimeStamp = Util.FormatTimeToTimeStamp(TimeConfig["time"][0])
     if Util.GetCurrentTimeStamp() > ActivityTimeStamp:
         return False
-
-    if GetNumOfActivitiesFromSender(SenderName) >= 3:
-        return False
-
     return True
 
 
