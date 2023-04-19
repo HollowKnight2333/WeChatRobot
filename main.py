@@ -31,7 +31,7 @@ if __name__ == '__main__':
             try:
                 ActionSimulator.BackupGroupAnnouncement()
                 ChatMsg = ActionSimulator.GetChatMsg()
-                # ChatMsg = Util.FileToStr('./Saved/Chat_Msg/1679803636.txt')
+                # ChatMsg = Util.FileToStr('./Saved/Chat_Msg/1680253459.txt')
                 GroupAnnouncement = Generator.GenerateAnnouncement(ChatMsg, NeedClear)
                 print(GroupAnnouncement)
                 pyperclip.copy(GroupAnnouncement)
@@ -41,7 +41,7 @@ if __name__ == '__main__':
                 if ZeroAM < CurrentTimeStamp < ZeroAM + 60 * 60 * 9:
                     time.sleep(60 * 60 * 9)
                 else:
-                    time.sleep(60 * 5)
+                    time.sleep(60 * 60 * 2)
             except Exception as e:
                 print(e)
                 # ActionSimulator.SendChatMsg("@呼呼哈嘿嘿 exception raised")

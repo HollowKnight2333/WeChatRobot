@@ -194,8 +194,8 @@ def FormatSendContent(SendContent):
     SendContent = SendContent.replace("，", " ")
     SendContent = SendContent.replace(",", " ")
     OriginSendContent = SendContent
-    Output = FormatDateMatch(SendContent, "月")
     Output = FormatDateMatch(SendContent, ".")
+
     return Output, OriginSendContent
 
 
@@ -210,9 +210,14 @@ def ActivityToString(Activity, Count):
     SenderName = Activity["SenderName"]
     SendContent = Activity["SendContent"]
     Requirement = Activity["Requirement"]
+    TimeStamp = Util.FormatTimeToTimeStamp(Activity["TimeConfig"]["time"][0])
+    CurrentTimeStamp = time.time()
     Desc = SendContent + Requirement
     Desc = Desc.rstrip()
-    return "【{}】 {}, 上车滴滴:{}。\n".format(Count, Desc, SenderName)
+    if TimeStamp - CurrentTimeStamp < 60 * 60 * 24 * 3:
+        return "#【{}】{}, 上车滴滴:{}。\n".format(Count, Desc, SenderName)
+    else:
+        return "【{}】 {}, 上车滴滴:{}。\n".format(Count, Desc, SenderName)
 
 
 def Delete(SenderName, Param):
@@ -272,7 +277,7 @@ def Preprocess(ChatMsg):
 def GetSendTime(ChatMsg):
     Info = ChatMsg.split("\n")[0].split(" ")
     InfoLen = len(Info)
-    TimeInfo = str(Info[InfoLen-2] + Info[InfoLen-1])
+    TimeInfo = str(Info[InfoLen - 2] + Info[InfoLen - 1])
     TimeConfig = jionlp.parse_time(TimeInfo, time_base=time.time())
     return Util.FormatTimeToTimeStamp(TimeConfig["time"][0])
 
@@ -282,7 +287,7 @@ def GenerateAnnouncement(ChatMsg, bClearMsg):
     Clear()
     ChatMsg = Util.FileToStr("./Saved/Filtered_Chat_Msg/ChatMsg.txt") + ChatMsg
     ChatMsg = ChatMsg.replace("\r", "\n")
-    FindLists = re.findall(".+[0-9]{2}.+[0-9]{2}\n@Bot[\s\S]*?\n\n", ChatMsg)
+    FindLists = re.findall(".+[0-9]{2}.+[0-9]{2}\n@[B|b][O|o][t|T][\s\S]*?\n\n", ChatMsg)
     HasBeenHandled = {}
     for ChatMsg in FindLists:
         ChatMsg = Preprocess(ChatMsg)
