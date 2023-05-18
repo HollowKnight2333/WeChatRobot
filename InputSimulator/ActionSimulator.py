@@ -51,17 +51,17 @@ def ClickSearchBox():
     InputSimulatorBase.MouseMoveToClick(SEARCH_BOX_POS, True)
 
 
-def PasteGroupName():
+def PasteGroupName(GroupIndex):
     pyperclip.copy("")
-    pyperclip.copy(Statics.GROUP_NAME)
+    pyperclip.copy(Statics.GROUP_NAME[GroupIndex])
     InputSimulatorBase.MouseRightClick()
     InputSimulatorBase.MouseMoveToClick(SEARCH_BOX_PASTE_POS, False)
 
 
-def SelectGroup():
+def SelectGroup(GroupIndex):
     OpenWeChat()
     ClickSearchBox()
-    PasteGroupName()
+    PasteGroupName(GroupIndex)
     time.sleep(2)
     InputSimulatorBase.MouseMoveToClick(GROUP_POS, True)
 
@@ -94,14 +94,14 @@ def FormatString(InStr):
     return cop.sub('', InStr)
 
 
-def SaveGroupAnnouncement():
+def SaveGroupAnnouncement(GroupIndex):
     InputSimulatorBase.MouseMoveToClick(GROUP_ANNOUNCEMENT_EDIT_BUTTON, True)
     InputSimulatorBase.MouseMoveToClick(GROUP_ANNOUNCEMENT_TOP_LEFT_BUTTON, True)
     time.sleep(1)
     InputSimulatorBase.SelectAll()
     time.sleep(1)
     InputSimulatorBase.Copy()
-    SaveCurrentPaste("Group_Announcement")
+    SaveCurrentPaste("Group_Announcement{}".format(GroupIndex))
     InputSimulatorBase.MouseMoveToClick(GROUP_ANNOUNCEMENT_CANCEL_BUTTON, True)
 
 
@@ -110,10 +110,10 @@ def Reset():
     InputSimulatorBase.MouseMoveToClick(PYCHARM_POS, True)
 
 
-def BackupGroupAnnouncement():
-    SelectGroup()
+def BackupGroupAnnouncement(GroupIndex):
+    SelectGroup(GroupIndex)
     OpenGroupAnnouncement()
-    SaveGroupAnnouncement()
+    SaveGroupAnnouncement(GroupIndex)
     Reset()
 
 
@@ -144,7 +144,7 @@ def CopyPart():
     time.sleep(0.3)
 
 
-def SelectAllChatMsg():
+def SelectAllChatMsg(GroupIndex):
     ScrollToTop()
     ChatMsg = ""
     Count = 0
@@ -157,9 +157,9 @@ def SelectAllChatMsg():
             Count = Count + 1
         else:
             if ChatMsg.find(IncrementMsg) != -1:
-                print("\nMatch {} {} [Begin]".format(Count, Util.GetCurrentTimeStamp()))
-                print(IncrementMsg)
-                print("\nMatch [End]\n")
+                # print("\nMatch {} {} [Begin]".format(Count, Util.GetCurrentTimeStamp()))
+                # print(IncrementMsg)
+                # print("\nMatch [End]\n")
 
                 Count = Count + 1
             else:
@@ -169,14 +169,14 @@ def SelectAllChatMsg():
         if Index == 49:
             raise Exception("Try too many times")
     pyperclip.copy(ChatMsg)
-    SaveCurrentPaste("Chat_Msg")
+    SaveCurrentPaste("Chat_Msg{}".format(GroupIndex))
     return ChatMsg
 
 
-def GetChatMsg():
-    SelectGroup()
+def GetChatMsg(GroupIndex):
+    SelectGroup(GroupIndex)
 
-    ChatMsg = SelectAllChatMsg()
+    ChatMsg = SelectAllChatMsg(GroupIndex)
     Reset()
 
     return ChatMsg
@@ -206,18 +206,19 @@ def EditAnnouncement(Announcement):
     time.sleep(4)
 
 
-def EditGroupAnnouncement(Announcement):
-    SelectGroup()
+def EditGroupAnnouncement(Announcement, GroupIndex):
+    SelectGroup(GroupIndex)
     OpenGroupAnnouncement()
     EditAnnouncement(Announcement)
     Reset()
 
 
 def ClearMsg():
-    SelectGroup()
-    InputSimulatorBase.MouseMoveToClick(GROUP_RIGHT_SIDE_BUTTON, True)
-    InputSimulatorBase.MouseMove(CLEAR_AIM_POS, True)
-    InputSimulatorBase.MouseScrollDown()
-    InputSimulatorBase.MouseMoveToClick(CLEAR_ENTER_POS, True)
-    InputSimulatorBase.MouseMoveToClick(CLEAR_CONFIRM_POS, True)
-    Reset()
+    for GroupIndex in range(0, 2):
+        SelectGroup(GroupIndex)
+        InputSimulatorBase.MouseMoveToClick(GROUP_RIGHT_SIDE_BUTTON, True)
+        InputSimulatorBase.MouseMove(CLEAR_AIM_POS, True)
+        InputSimulatorBase.MouseScrollDown()
+        InputSimulatorBase.MouseMoveToClick(CLEAR_ENTER_POS, True)
+        InputSimulatorBase.MouseMoveToClick(CLEAR_CONFIRM_POS, True)
+        Reset()

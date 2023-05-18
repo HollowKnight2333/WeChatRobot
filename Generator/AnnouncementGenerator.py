@@ -282,14 +282,30 @@ def GetSendTime(ChatMsg):
     return Util.FormatTimeToTimeStamp(TimeConfig["time"][0])
 
 
-def GenerateAnnouncement(ChatMsg, bClearMsg):
-    global ValidChatMsg, ChatMsgs, HasBeenHandled
-    Clear()
-    ChatMsg = Util.FileToStr("./Saved/Filtered_Chat_Msg/ChatMsg.txt") + ChatMsg
+def GetFindListWithTag(ChatMsg, Tag):
     ChatMsg = ChatMsg.replace("\r", "\n")
     FindLists = re.findall(".+[0-9]{2}.+[0-9]{2}\n@[B|b][O|o][t|T][\s\S]*?\n\n", ChatMsg)
+    for Index in range(0, len(FindLists)):
+        FindLists[Index] = FindLists[Index][:-2]
+        FindLists[Index] += (" " + Tag)
+        FindLists[Index] += "\n\n"
+    return FindLists
+
+
+def GenerateAnnouncement(ChatMsg0, ChatMsg1, bClearMsg):
+    global ValidChatMsg, ChatMsgs, HasBeenHandled
+    Clear()
+    ChatMsg = Util.FileToStr("./Saved/Filtered_Chat_Msg/ChatMsg.txt")
+    FindList = GetFindListWithTag(ChatMsg, "")
+    FindList0 = GetFindListWithTag(ChatMsg0, "【一群活动】")
+    FindList1 = GetFindListWithTag(ChatMsg1, "【二群活动】")
+    for FindPattern in FindList0:
+        FindList.append(FindPattern)
+    for FindPattern in FindList1:
+        FindList.append(FindPattern)
+
     HasBeenHandled = {}
-    for ChatMsg in FindLists:
+    for ChatMsg in FindList:
         ChatMsg = Preprocess(ChatMsg)
         if HasBeenHandled.get(ChatMsg):
             continue

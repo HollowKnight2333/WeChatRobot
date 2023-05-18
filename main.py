@@ -29,22 +29,25 @@ if __name__ == '__main__':
                 NeedClear = True
                 bClear = True
             try:
-                ActionSimulator.BackupGroupAnnouncement()
-                ChatMsg = ActionSimulator.GetChatMsg()
-                # ChatMsg = Util.FileToStr('./Saved/Chat_Msg/1680253459.txt')
-                GroupAnnouncement = Generator.GenerateAnnouncement(ChatMsg, NeedClear)
+                for GroupIndex in range(0, 2):
+                    ActionSimulator.BackupGroupAnnouncement(GroupIndex)
+
+                ChatMsg0 = ActionSimulator.GetChatMsg(0)
+                ChatMsg1 = ActionSimulator.GetChatMsg(1)
+                GroupAnnouncement = Generator.GenerateAnnouncement(ChatMsg0, ChatMsg1, NeedClear)
                 print(GroupAnnouncement)
                 pyperclip.copy(GroupAnnouncement)
-                if ActionSimulator.SaveCurrentPaste("Group_Announcement"):
-                    ActionSimulator.EditGroupAnnouncement(GroupAnnouncement)
-                    EndTimeStamp = Util.GetCurrentTimeStamp()
+                for GroupIndex in range(0, 2):
+                    if ActionSimulator.SaveCurrentPaste("Group_Announcement{}".format(GroupIndex)):
+                        ActionSimulator.EditGroupAnnouncement(GroupAnnouncement, GroupIndex)
+                        EndTimeStamp = Util.GetCurrentTimeStamp()
                 if ZeroAM < CurrentTimeStamp < ZeroAM + 60 * 60 * 9:
                     time.sleep(60 * 60 * 9)
                 else:
                     time.sleep(60 * 60 * 2)
             except Exception as e:
                 print(e)
-                # ActionSimulator.SendChatMsg("@呼呼哈嘿嘿 exception raised")
+                ActionSimulator.SendChatMsg("@呼呼哈嘿嘿 exception raised")
                 break
     # while True:
     #     print(autogui.position())
